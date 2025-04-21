@@ -1,0 +1,17 @@
+1. Fully dynamic rendering of table rows using data and config. - done
+2.Column headers are generated from a columns config object.Sort icons are added to sortable columns - done
+3.Filters data on keypress (with debounce) using filterable columns.- done
+4.Supports sorting by number, date, and string.- done 
+5.Separate module (columns.js) for defining column structure with keys like key, label, sortable, filterable, width, and render - done
+6.Fetches data from an external API and renders dynamically — making it fully reusable with any AP - done
+7.Custom render function per column is supported. Example: joined date column highlights specific months in blue. - done
+8.Only visible rows and a few extra rows (bufferSize) are rendered in the DOM for performance efficiency.- done
+9.Uses a debounce method to optimize filtering input behavior. - done
+10.Displays a custom "No data found" row when filter results are empty
+
+
+fixed
+11.Now handles all major data types:
+Numbers ,Valid Dates ,Case-insensitive strings
+Avoids incorrect sorting by checking for parseable date string
+12. Dynamically updates sort icon (↕, ⬆️, ⬇️) based on current sort state
