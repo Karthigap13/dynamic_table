@@ -9,7 +9,6 @@ export class TableComponent {
     this.scrollContainer = document.getElementById("scrollContainer");
     this.spacer = document.querySelector(".spacer");
     this.filterInput = document.getElementById("filterInput");
-
     this.currentSort = { key: null, direction: 'asc' };
   }
 
@@ -22,7 +21,10 @@ export class TableComponent {
 
   createHeader() {
     const tableHeader = document.getElementById("tableHeader");
-    tableHeader.innerHTML = "";
+    while (tableHeader.firstChild) {
+      tableHeader.removeChild(tableHeader.firstChild);
+    }
+
     this.columns.forEach((col) => {
       const cell = document.createElement("div");
       cell.classList.add("cell");
@@ -30,7 +32,6 @@ export class TableComponent {
         cell.style.width = col.width;
       }
       cell.textContent = col.label;
-     
       if (col.sortable) {
         cell.classList.add("sort-header");
         cell.setAttribute("data-key", col.key);
@@ -46,7 +47,6 @@ export class TableComponent {
   attachEvents() {
     this.scrollContainer.addEventListener("scroll", () => this.renderVisibleRows());
     this.filterInput.addEventListener("input", this.debounce((e) => this.handleFilter(e.target.value), 300));
-
     document.getElementById("tableHeader").addEventListener("click", (e) => {
       const header = e.target.closest(".sort-header");
       if (header) {
@@ -81,9 +81,11 @@ export class TableComponent {
       noDataRow.style.textAlign = 'center';
       noDataRow.style.padding = '10px';
       noDataRow.style.color = 'red';
-      this.tableBody.innerHTML = ""; 
-      this.tableBody.appendChild(noDataRow); 
-      return; 
+      while (this.tableBody.firstChild) {
+        this.tableBody.removeChild(this.tableBody.firstChild);
+      }
+      this.tableBody.appendChild(noDataRow);
+      return;
     }
 
     this.sortData();
@@ -94,23 +96,24 @@ export class TableComponent {
   sortData() {
     const { key, direction } = this.currentSort;
     if (!key) return;
-
+  
+    const dir = direction === 'asc' ? 1 : -1;
     this.filteredData.sort((a, b) => {
-      const dir = direction === 'asc' ? 1 : -1;
-      if (typeof a[key] === 'string') {
-        return a[key].toLowerCase().localeCompare(b[key].toLowerCase()) * dir;
-      } else if (typeof a[key] === 'number' || !isNaN(Date.parse(a[key]))) {
+      if (typeof a[key] === 'number' && typeof b[key] === 'number') {
+        return (a[key] - b[key]) * dir;
+      } else if (!isNaN(Date.parse(a[key])) && !isNaN(Date.parse(b[key]))) {
         return (new Date(a[key]) - new Date(b[key])) * dir;
+      } else {
+        return a[key].toString().toLowerCase().localeCompare(b[key].toString().toLowerCase()) * dir;
       }
-      return 0;
     });
   }
+  
 
   updateSortIcons() {
     document.querySelectorAll(".sort-header").forEach((header) => {
       const icon = header.querySelector(".sort-icon");
       const key = header.getAttribute("data-key");
-
       if (key === this.currentSort.key) {
         icon.textContent = this.currentSort.direction === 'asc' ? '⬆️' : '⬇️';
       } else {
@@ -134,7 +137,6 @@ export class TableComponent {
   renderVisibleRows() {
     const scrollTop = this.scrollContainer.scrollTop;
     const containerHeight = this.scrollContainer.clientHeight;
-
     const startIndex = Math.max(
       0,
       Math.floor(scrollTop / this.rowHeight) - this.bufferSize
@@ -146,13 +148,13 @@ export class TableComponent {
 
     this.tableBody.style.transform = `translateY(${startIndex * this.rowHeight}px)`;
     const visibleData = this.filteredData.slice(startIndex, endIndex);
-
-    this.tableBody.innerHTML = "";
+    while (this.tableBody.firstChild) {
+      this.tableBody.removeChild(this.tableBody.firstChild);
+    }
 
     visibleData.forEach((row) => {
       const rowDiv = document.createElement("div");
       rowDiv.className = "row";
-
       this.columns.forEach((col) => {
         const cell = document.createElement("div");
         cell.classList.add("cell");
